@@ -440,7 +440,6 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 var _lodash = lodash,
     isEmpty = _lodash.isEmpty;
 function Edit(props) {
-  // todolist
   var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["useState"])([]),
       _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useState, 2),
       todoList = _useState2[0],
@@ -449,80 +448,92 @@ function Edit(props) {
   var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["useState"])(''),
       _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useState3, 2),
       todoLabel = _useState4[0],
-      setTodoLabel = _useState4[1]; // is updating?
-
+      setTodoLabel = _useState4[1];
 
   var _useState5 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["useState"])({}),
       _useState6 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useState5, 2),
-      updatingTodo = _useState6[0],
-      setUpdatingTodo = _useState6[1];
+      updateItem = _useState6[0],
+      setUpdateItem = _useState6[1];
 
   var addTodo = function addTodo() {
-    // new todo
     var newTodo = {
-      id: Math.floor(Math.random() * 10000),
+      id: Math.floor(Math.random() * 1000),
       isCompleted: false,
       label: todoLabel
-    }; // updating the todo list
-
-    setTodoList([].concat(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(todoList), [newTodo])); // removing the current value from text box
-
+    };
+    setTodoList([].concat(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(todoList), [newTodo]));
     setTodoLabel('');
   };
 
-  var updateTodo = function updateTodo() {
-    var id = updatingTodo.id;
+  var delteHandler = function delteHandler(id) {
+    var delteItem = todoList.filter(function (i) {
+      return i.id !== id;
+    });
+    setTodoList(delteItem);
+  };
+
+  var updateTodoListHandler = function updateTodoListHandler() {
+    var id = updateItem.id;
+    var updateTodoList = todoList.map(function (todo) {
+      if (todo.id === id) {
+        return updateItem;
+      }
+
+      return todo;
+    });
+    setTodoList(updateTodoList);
+    setUpdateItem({});
+  };
+
+  var comepleteHandler = function comepleteHandler(id) {
     var updatedTodoList = todoList.map(function (todo) {
       if (todo.id === id) {
-        return updatingTodo;
+        return _objectSpread(_objectSpread({}, todo), {}, {
+          isCompleted: todo.isCompleted ? false : true
+        });
       }
 
       return todo;
     });
     setTodoList(updatedTodoList);
-    setUpdatingTodo({});
   };
 
-  var deleteTodoItem = function deleteTodoItem(id) {
-    var newTodoList = todoList.filter(function (i) {
-      return i.id !== id;
-    }); // []
-
-    setTodoList(newTodoList);
-  };
-
-  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("div", {
+  return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("div", {
     className: "cwp_box_wrapper"
   }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__["TextControl"], {
-    value: !isEmpty(updatingTodo) ? updatingTodo.label : todoLabel,
+    value: !isEmpty(updateItem) ? updateItem.label : todoLabel,
     onChange: function onChange(newTodo) {
-      return !isEmpty(updatingTodo) ? setUpdatingTodo(_objectSpread(_objectSpread({}, updatingTodo), {}, {
+      return !isEmpty(updateItem) ? setUpdateItem(_objectSpread(_objectSpread({}, updateItem), {}, {
         label: newTodo
       })) : setTodoLabel(newTodo);
     }
   }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__["Button"], {
     isPrimary: true,
     onClick: function onClick() {
-      return !isEmpty(updatingTodo) ? updateTodo() : addTodo();
+      return !isEmpty(updateItem) ? updateTodoListHandler() : addTodo();
     }
-  }, !isEmpty(updatingTodo) ? "Update Todo" : "Add Todo"), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("ul", {
+  }, "Add Todo")), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("ul", {
     className: "cwp_todo_list"
-  }, todoList.map(function (todo, idx) {
-    var label = todo.label,
-        id = todo.id,
+  }, todoList.map(function (todo) {
+    var id = todo.id,
+        label = todo.label,
         isCompleted = todo.isCompleted;
-    return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("li", {
-      key: idx
-    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("span", null, label), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("span", {
+    return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("li", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("span", {
+      className: isCompleted ? 'strike-line' : ''
+    }, label), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__["CheckboxControl"], {
+      checked: isCompleted,
+      onChange: function onChange() {
+        return comepleteHandler(id);
+      }
+    }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("span", {
       className: "cwp_todo_delete",
       onClick: function onClick() {
-        return deleteTodoItem(id);
+        return delteHandler(id);
       }
     }, "X"), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_3__["createElement"])("span", {
       className: "cwp_todo_edit",
       onClick: function onClick() {
-        setUpdatingTodo(todo);
-        console.log(todo);
+        return setUpdateItem(todo);
       }
     }, "Edit"));
   })));

@@ -1,104 +1,96 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment, useState } from '@wordpress/element';
-import {
-	TextControl,
-	Button
-} from '@wordpress/components';
+import { TextControl, Button, CheckboxControl } from '@wordpress/components';
 import './editor.scss';
 
-const {  isEmpty } = lodash;
+const { isEmpty } = lodash;
 
 export default function Edit(props) {
-
-	// todolist
 	const [ todoList, setTodoList ] = useState([]);
 	const [ todoLabel, setTodoLabel ] = useState('');
-
-	// is updating?
-	const [ updatingTodo, setUpdatingTodo ] = useState({});
-	 
+	const [ updateItem, setUpdateItem ] = useState({});
 
 	const addTodo = () => {
-
-		// new todo
 		const newTodo = {
-			id: Math.floor(Math.random() * 10000),
+			id: Math.floor(Math.random() * 1000),
 			isCompleted: false,
 			label: todoLabel
-		}
+		};
 
-		// updating the todo list
-		setTodoList([
-			...todoList,
-			newTodo
-		])
+		setTodoList([ ...todoList, newTodo ]);
+		setTodoLabel('');
+	};
 
-		// removing the current value from text box
+	const delteHandler = (id) => {
+		let delteItem = todoList.filter((i) => i.id !== id);
+		setTodoList(delteItem);
+	};
 
-		setTodoLabel('');  
-	}
-
-	const updateTodo = () => {
-
-		const { id } = updatingTodo;
-
-		const updatedTodoList = todoList.map( todo => {
-
-			if ( todo.id === id ) {
-				return updatingTodo
+	const updateTodoListHandler = () => {
+		const { id } = updateItem;
+		const updateTodoList = todoList.map((todo) => {
+			if (todo.id === id) {
+				return updateItem;
 			}
 
 			return todo;
+		});
 
-		} );
+		setTodoList(updateTodoList);
+		setUpdateItem({});
+	};
 
-		setTodoList(updatedTodoList);
-		setUpdatingTodo({});
+	const comepleteHandler = id => {
+
+		const updatedTodoList = todoList.map(( todo ) => {
 
 
+			if ( todo.id === id ) {
+				return {
+					...todo,
+					isCompleted: todo.isCompleted ? false : true 
+				}
+			}
+			
+			return todo;
+		});
+
+		setTodoList( updatedTodoList );
 	}
-
-	const deleteTodoItem = (id) => {
-		let newTodoList = todoList.filter(i => i.id !== id); // []
-		setTodoList(newTodoList);
-	}
-
-
-
 
 	return (
-	
-		<div className="cwp_box_wrapper">
-			<TextControl 
-				value={ !isEmpty( updatingTodo ) ? updatingTodo.label : todoLabel } 
-				onChange={(newTodo) => !isEmpty( updatingTodo ) ? setUpdatingTodo({ ...updatingTodo, label: newTodo }) : setTodoLabel(newTodo)}
-				
-			/>
-			<Button isPrimary onClick={ () => !isEmpty( updatingTodo ) ? updateTodo() : addTodo() }>
-				{
-					!isEmpty( updatingTodo ) ? "Update Todo" : "Add Todo"
-				}
-			</Button>
-			
+		<Fragment>
+			<div className="cwp_box_wrapper">
+				<TextControl
+					value={!isEmpty(updateItem) ? updateItem.label : todoLabel}
+					onChange={(newTodo) =>
+						!isEmpty(updateItem) ? setUpdateItem({ ...updateItem, label: newTodo }) : setTodoLabel(newTodo)}
+				/>
+				<Button isPrimary onClick={() => (!isEmpty(updateItem) ? updateTodoListHandler() : addTodo())}>
+					Add Todo
+				</Button>
+			</div>
+
 			<ul className="cwp_todo_list">
-               {
-                todoList.map((todo, idx) => {
-				   const { label, id, isCompleted } = todo;
-					return(
-                      <li key={idx}>
-						  <span>{label}</span>
-						  <span className="cwp_todo_delete" onClick={() => deleteTodoItem(id)}>X</span>
-						  <span className="cwp_todo_edit" onClick={() => {
-							  setUpdatingTodo( todo );
-							  console.log( todo )
-						  }}>Edit</span>
-				 	  </li>
-				   )
-				})
-			   }
+				{todoList.map((todo) => {
+					const { id, label, isCompleted } = todo;
+					return (
+						<li>
+							<span className={isCompleted ? 'strike-line' : ''}>{label}</span>
+							<CheckboxControl 
+								checked={isCompleted}
+								onChange={ () => comepleteHandler( id ) }
+							/>
+							<span className="cwp_todo_delete" onClick={() => delteHandler(id)}>
+								X
+							</span>
+							<span className="cwp_todo_edit" onClick={() => setUpdateItem(todo)}>
+								Edit
+							</span>
+						</li>
+					);
+				})}
 			</ul>
-			
-		</div>
-	
+		</Fragment>
 	);
 }
